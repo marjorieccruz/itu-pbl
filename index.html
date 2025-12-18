@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PBL — Project-Based Learning</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-bg: #0d0d0d;
+            --color-text: #f5f5f0;
+            --color-accent: #e8c547;
+            --color-muted: #8a8a7a;
+            --color-card: #1a1a18;
+            --font-display: 'Playfair Display', Georgia, serif;
+            --font-body: 'Source Sans 3', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            font-family: var(--font-body);
+            font-weight: 300;
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* Noise texture overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            opacity: 0.03;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1.5rem 4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            background: linear-gradient(to bottom, var(--color-bg) 0%, transparent 100%);
+        }
+
+        .logo {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            color: var(--color-accent);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--color-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--color-text);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 8rem 4rem 4rem;
+            position: relative;
+        }
+
+        .hero-content {
+            max-width: 900px;
+        }
+
+        .hero-label {
+            font-size: 0.8rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--color-accent);
+            margin-bottom: 2rem;
+            opacity: 0;
+            animation: fadeUp 0.8s ease forwards 0.2s;
+        }
+
+        .hero h1 {
+            font-family: var(--font-display);
+            font-size: clamp(3.5rem, 10vw, 8rem);
+            font-weight: 400;
+            line-height: 1.05;
+            margin-bottom: 2rem;
+            opacity: 0;
+            animation: fadeUp 0.8s ease forwards 0.4s;
+        }
+
+        .hero h1 em {
+            font-style: italic;
+            color: var(--color-accent);
+        }
+
+        .hero-description {
+            font-size: 1.25rem;
+            color: var(--color-muted);
+            max-width: 600px;
+            margin-bottom: 3rem;
+            opacity: 0;
+            animation: fadeUp 0.8s ease forwards 0.6s;
+        }
+
+        .hero-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 2rem;
+            background: var(--color-accent);
+            color: var(--color-bg);
+            text-decoration: none;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            transition: all 0.3s ease;
+            opacity: 0;
+            animation: fadeUp 0.8s ease forwards 0.8s;
+        }
+
+        .hero-cta:hover {
+            transform: translateX(8px);
+            box-shadow: -8px 8px 0 var(--color-text);
+        }
+
+        .hero-cta svg {
+            transition: transform 0.3s ease;
+        }
+
+        .hero-cta:hover svg {
+            transform: translateX(4px);
+        }
+
+        /* Decorative elements */
+        .hero-decoration {
+            position: absolute;
+            right: 8%;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 300px;
+            height: 400px;
+            border: 1px solid var(--color-accent);
+            opacity: 0.3;
+        }
+
+        .hero-decoration::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: -20px;
+            bottom: -20px;
+            border: 1px solid var(--color-muted);
+        }
+
+        /* Stats Section */
+        .stats {
+            padding: 6rem 4rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 3rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-family: var(--font-display);
+            font-size: 4rem;
+            color: var(--color-accent);
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--color-muted);
+        }
+
+        /* Section Styles */
+        section {
+            padding: 8rem 4rem;
+        }
+
+        .section-header {
+            margin-bottom: 4rem;
+        }
+
+        .section-label {
+            font-size: 0.75rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--color-accent);
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-family: var(--font-display);
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 400;
+            line-height: 1.2;
+        }
+
+        /* What is PBL */
+        .what-is-pbl {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6rem;
+            align-items: center;
+        }
+
+        .what-is-pbl .content p {
+            font-size: 1.1rem;
+            color: var(--color-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .quote-block {
+            position: relative;
+            padding: 3rem;
+            background: var(--color-card);
+        }
+
+        .quote-block::before {
+            content: '"';
+            font-family: var(--font-display);
+            font-size: 8rem;
+            color: var(--color-accent);
+            opacity: 0.3;
+            position: absolute;
+            top: -1rem;
+            left: 1rem;
+            line-height: 1;
+        }
+
+        .quote-block p {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-style: italic;
+            line-height: 1.6;
+            position: relative;
+            z-index: 1;
+        }
+
+        .quote-author {
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--color-muted);
+        }
+
+        /* Pillars/Features */
+        .pillars {
+            background: var(--color-card);
+        }
+
+        .pillars-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .pillar-card {
+            padding: 2.5rem;
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pillar-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--color-accent);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s ease;
+        }
+
+        .pillar-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .pillar-card:hover {
+            border-color: rgba(255,255,255,0.2);
+            transform: translateY(-8px);
+        }
+
+        .pillar-number {
+            font-family: var(--font-display);
+            font-size: 3rem;
+            color: var(--color-accent);
+            opacity: 0.5;
+            line-height: 1;
+            margin-bottom: 1rem;
+        }
+
+        .pillar-card h3 {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 400;
+            margin-bottom: 1rem;
+        }
+
+        .pillar-card p {
+            color: var(--color-muted);
+            font-size: 0.95rem;
+        }
+
+        /* Process Section */
+        .process-timeline {
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .process-timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: linear-gradient(to bottom, transparent, var(--color-accent), transparent);
+        }
+
+        .process-step {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            margin-bottom: 4rem;
+            position: relative;
+        }
+
+        .process-step:nth-child(even) .step-content {
+            order: 2;
+            text-align: left;
+        }
+
+        .process-step:nth-child(odd) .step-content {
+            text-align: right;
+        }
+
+        .step-marker {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            transform: translateX(-50%);
+            width: 16px;
+            height: 16px;
+            background: var(--color-accent);
+            border-radius: 50%;
+        }
+
+        .step-number {
+            font-family: var(--font-display);
+            font-size: 4rem;
+            color: var(--color-accent);
+            opacity: 0.3;
+            line-height: 1;
+        }
+
+        .step-content h3 {
+            font-family: var(--font-display);
+            font-size: 1.75rem;
+            font-weight: 400;
+            margin-bottom: 0.75rem;
+        }
+
+        .step-content p {
+            color: var(--color-muted);
+        }
+
+        /* Benefits Section */
+        .benefits {
+            background: linear-gradient(135deg, var(--color-bg) 0%, #1a1a18 100%);
+        }
+
+        .benefits-container {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 4rem;
+        }
+
+        .benefits-list {
+            list-style: none;
+        }
+
+        .benefits-list li {
+            padding: 1.5rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .benefits-list li::before {
+            content: '→';
+            color: var(--color-accent);
+            font-weight: 600;
+        }
+
+        .benefit-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .benefit-desc {
+            font-size: 0.9rem;
+            color: var(--color-muted);
+        }
+
+        /* Resources Section */
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .resource-card {
+            padding: 2rem;
+            background: var(--color-card);
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .resource-card:hover {
+            border-color: var(--color-accent);
+            transform: translateY(-4px);
+        }
+
+        .resource-type {
+            font-size: 0.7rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--color-accent);
+            margin-bottom: 1rem;
+        }
+
+        .resource-card h3 {
+            font-family: var(--font-display);
+            font-size: 1.25rem;
+            font-weight: 400;
+            margin-bottom: 0.75rem;
+        }
+
+        .resource-card p {
+            font-size: 0.9rem;
+            color: var(--color-muted);
+        }
+
+        /* Footer */
+        footer {
+            padding: 4rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .footer-title {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer-text {
+            color: var(--color-muted);
+            margin-bottom: 2rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: var(--color-text);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--color-accent);
+        }
+
+        .copyright {
+            margin-top: 3rem;
+            font-size: 0.8rem;
+            color: var(--color-muted);
+        }
+
+        /* Animations */
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Scroll animations */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s ease;
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            nav {
+                padding: 1rem 2rem;
+            }
+
+            section {
+                padding: 5rem 2rem;
+            }
+
+            .hero {
+                padding: 6rem 2rem 3rem;
+            }
+
+            .hero-decoration {
+                display: none;
+            }
+
+            .what-is-pbl {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+
+            .benefits-container {
+                grid-template-columns: 1fr;
+            }
+
+            .process-timeline::before {
+                left: 0;
+            }
+
+            .process-step {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+                padding-left: 2rem;
+            }
+
+            .process-step:nth-child(odd) .step-content,
+            .process-step:nth-child(even) .step-content {
+                text-align: left;
+                order: 1;
+            }
+
+            .step-marker {
+                left: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .stats {
+                padding: 3rem 2rem;
+            }
+
+            .stat-number {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="logo">PBL</div>
+        <ul class="nav-links">
+            <li><a href="#about">About</a></li>
+            <li><a href="#pillars">Pillars</a></li>
+            <li><a href="#process">Process</a></li>
+            <li><a href="#benefits">Benefits</a></li>
+            <li><a href="#resources">Resources</a></li>
+        </ul>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <p class="hero-label">Educational Methodology</p>
+            <h1>Project-Based <em>Learning</em></h1>
+            <p class="hero-description">
+                A dynamic approach to education where students gain knowledge and skills by working on real-world challenges and projects over an extended period.
+            </p>
+            <a href="#about" class="hero-cta">
+                Explore PBL
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+        <div class="hero-decoration"></div>
+    </section>
+
+    <!-- Stats -->
+    <section class="stats">
+        <div class="stat-item">
+            <div class="stat-number">91%</div>
+            <div class="stat-label">Student Engagement</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">78%</div>
+            <div class="stat-label">Better Retention</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">85%</div>
+            <div class="stat-label">Critical Thinking</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">3x</div>
+            <div class="stat-label">Collaboration Skills</div>
+        </div>
+    </section>
+
+    <!-- What is PBL -->
+    <section id="about">
+        <div class="what-is-pbl">
+            <div class="content reveal">
+                <div class="section-header">
+                    <p class="section-label">Understanding</p>
+                    <h2 class="section-title">What is Project-Based Learning?</h2>
+                </div>
+                <p>
+                    Project-Based Learning (PBL) is a teaching method in which students learn by actively engaging in real-world and personally meaningful projects. Students work on a project over an extended period of time that engages them in solving a real-world problem or answering a complex question.
+                </p>
+                <p>
+                    Unlike traditional instruction, PBL puts students at the center of the learning process. They demonstrate their knowledge and skills by creating a public product or presentation for a real audience, developing deep content knowledge as well as critical thinking, creativity, and communication skills.
+                </p>
+            </div>
+            <div class="quote-block reveal">
+                <p>Learning is not the product of teaching. Learning is the product of the activity of learners.</p>
+                <div class="quote-author">— John Holt, Educator</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pillars Section -->
+    <section id="pillars" class="pillars">
+        <div class="section-header reveal">
+            <p class="section-label">Foundation</p>
+            <h2 class="section-title">The Seven Essential Elements</h2>
+        </div>
+        <div class="pillars-grid">
+            <div class="pillar-card reveal">
+                <div class="pillar-number">01</div>
+                <h3>Challenging Problem</h3>
+                <p>A meaningful problem or question that provides purpose and challenge, appropriate to students' level of knowledge and skill.</p>
+            </div>
+            <div class="pillar-card reveal">
+                <div class="pillar-number">02</div>
+                <h3>Sustained Inquiry</h3>
+                <p>An extended, rigorous process of asking questions, finding resources, and applying information to develop answers and solutions.</p>
+            </div>
+            <div class="pillar-card reveal">
+                <div class="pillar-number">03</div>
+                <h3>Authenticity</h3>
+                <p>Real-world context, tasks and tools, quality standards, or impact on personal concerns, interests, and issues in students' lives.</p>
+            </div>
+            <div class="pillar-card reveal">
+                <div class="pillar-number">04</div>
+                <h3>Student Voice & Choice</h3>
+                <p>Students make decisions about the project, including how they work and what they create, with appropriate guidance from teachers.</p>
+            </div>
+            <div class="pillar-card reveal">
+                <div class="pillar-number">05</div>
+                <h3>Reflection</h3>
+                <p>Students and teachers reflect on learning, the effectiveness of inquiry, project activities, quality of work, and obstacles encountered.</p>
+            </div>
+            <div class="pillar-card reveal">
+                <div class="pillar-number">06</div>
+                <h3>Critique & Revision</h3>
+                <p>Students give, receive, and use feedback to improve their process and products, following structured protocols and rubrics.</p>
+            </div>
+            <div class="pillar-card reveal">
+                <div class="pillar-number">07</div>
+                <h3>Public Product</h3>
+                <p>Students make their project work public by explaining, displaying, or presenting it to people beyond the classroom.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Process Section -->
+    <section id="process">
+        <div class="section-header reveal" style="text-align: center; max-width: 600px; margin: 0 auto 4rem;">
+            <p class="section-label">Implementation</p>
+            <h2 class="section-title">The PBL Process</h2>
+        </div>
+        <div class="process-timeline">
+            <div class="process-step reveal">
+                <div class="step-content">
+                    <div class="step-number">01</div>
+                    <h3>Launch the Project</h3>
+                    <p>Introduce the driving question and engage students with an entry event that sparks curiosity and interest.</p>
+                </div>
+                <div class="step-marker"></div>
+                <div></div>
+            </div>
+            <div class="process-step reveal">
+                <div></div>
+                <div class="step-marker"></div>
+                <div class="step-content">
+                    <div class="step-number">02</div>
+                    <h3>Build Knowledge</h3>
+                    <p>Students learn content and skills needed for the project through mini-lessons, research, and exploration.</p>
+                </div>
+            </div>
+            <div class="process-step reveal">
+                <div class="step-content">
+                    <div class="step-number">03</div>
+                    <h3>Develop & Critique</h3>
+                    <p>Teams create prototypes, draft solutions, and engage in structured feedback sessions to improve their work.</p>
+                </div>
+                <div class="step-marker"></div>
+                <div></div>
+            </div>
+            <div class="process-step reveal">
+                <div></div>
+                <div class="step-marker"></div>
+                <div class="step-content">
+                    <div class="step-number">04</div>
+                    <h3>Present & Reflect</h3>
+                    <p>Share final products with an authentic audience and reflect on the learning journey and outcomes.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Benefits Section -->
+    <section id="benefits" class="benefits">
+        <div class="benefits-container">
+            <div class="section-header reveal">
+                <p class="section-label">Impact</p>
+                <h2 class="section-title">Why PBL Works</h2>
+            </div>
+            <ul class="benefits-list reveal">
+                <li>
+                    <div>
+                        <div class="benefit-title">Deeper Learning</div>
+                        <div class="benefit-desc">Students develop mastery of academic content through application and practice in authentic contexts.</div>
+                    </div>
+                </li>
+                <li>
+                    <div>
+                        <div class="benefit-title">21st Century Skills</div>
+                        <div class="benefit-desc">Builds critical thinking, collaboration, communication, and creativity essential for future success.</div>
+                    </div>
+                </li>
+                <li>
+                    <div>
+                        <div class="benefit-title">Increased Engagement</div>
+                        <div class="benefit-desc">Students are motivated by meaningful work that connects to their interests and real-world issues.</div>
+                    </div>
+                </li>
+                <li>
+                    <div>
+                        <div class="benefit-title">Equity & Access</div>
+                        <div class="benefit-desc">Provides opportunities for all students to succeed through multiple pathways and diverse strengths.</div>
+                    </div>
+                </li>
+                <li>
+                    <div>
+                        <div class="benefit-title">Career Preparation</div>
+                        <div class="benefit-desc">Mirrors workplace environments where collaboration and problem-solving are essential.</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- Resources Section -->
+    <section id="resources">
+        <div class="section-header reveal">
+            <p class="section-label">Learn More</p>
+            <h2 class="section-title">Resources & References</h2>
+        </div>
+        <div class="resources-grid">
+            <a href="https://www.pblworks.org/" target="_blank" class="resource-card reveal">
+                <div class="resource-type">Organization</div>
+                <h3>PBLWorks</h3>
+                <p>The leading provider of PBL professional development, resources, and research.</p>
+            </a>
+            <a href="https://www.edutopia.org/project-based-learning" target="_blank" class="resource-card reveal">
+                <div class="resource-type">Resource Hub</div>
+                <h3>Edutopia PBL</h3>
+                <p>Articles, videos, and guides on implementing project-based learning effectively.</p>
+            </a>
+            <a href="https://hgse.me/pbl" target="_blank" class="resource-card reveal">
+                <div class="resource-type">Research</div>
+                <h3>Harvard GSE</h3>
+                <p>Research-based insights on the effectiveness and implementation of PBL.</p>
+            </a>
+            <a href="https://www.bie.org/" target="_blank" class="resource-card reveal">
+                <div class="resource-type">Institute</div>
+                <h3>Buck Institute</h3>
+                <p>Project design tools, rubrics, and frameworks for high-quality PBL.</p>
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <h2 class="footer-title">Ready to Transform Learning?</h2>
+            <p class="footer-text">
+                Project-Based Learning empowers students to become active, engaged learners prepared for the challenges of tomorrow.
+            </p>
+            <div class="footer-links">
+                <a href="#about">About PBL</a>
+                <a href="#pillars">Essential Elements</a>
+                <a href="#process">Implementation</a>
+                <a href="#resources">Resources</a>
+            </div>
+            <p class="copyright">© 2025 PBL Guide. Built for educators, by educators.</p>
+        </div>
+    </footer>
+
+    <!-- Scroll Reveal Script -->
+    <script>
+        function reveal() {
+            const reveals = document.querySelectorAll('.reveal');
+            
+            reveals.forEach(element => {
+                const windowHeight = window.innerHeight;
+                const elementTop = element.getBoundingClientRect().top;
+                const elementVisible = 150;
+                
+                if (elementTop < windowHeight - elementVisible) {
+                    element.classList.add('active');
+                }
+            });
+        }
+
+        window.addEventListener('scroll', reveal);
+        window.addEventListener('load', reveal);
+    </script>
+</body>
+</html>
